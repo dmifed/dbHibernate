@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+        xmlns:aop = "http://www.springframework.org/schema/aop"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:util="http://www.springframework.org/schema/util"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+   		http://www.springframework.org/schema/aop/spring-aop.xsd
+   		http://www.springframework.org/schema/p.xsd
+        ">
+    <tx:annotation-driven/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <context:component-scan base-package="dao"/>
+    <util:properties id="hibernateProperties">
+        <prop key="hibernate.dialect" >            org.hibernate.dialect.MySQL5Dialect        </prop>
+
+        <!--max depth ref class entity-->
+        <prop key="hibernate.max_fetch_depth">3</prop>
+
+        <!--max taken ref from query at same time-->
+        <prop key="hibernate.max_fetch_size">50</prop>
+
+        <!--max sending data at same time-->
+        <prop key="hibernate.max_batch_size">10</prop>
+
+        <!--if set true. show in log sql commands which hibernate generate-->
+        <prop key="hibernate.show_sql">true</prop>
+    </util:properties>
+
+    <bean id="webAlwaysNewDataSource"
+          class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+            <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
+        p:dataSource-ref="webAlwaysNewDataSource"
+        p:packagesToScan="dao"
+        p:hibernateProperties-ref="hibernateProperties"
+    />
+
+    <bean id="transactionManager"
+        class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          p:sessionFactory-ref="sessionFactory"
+    />
+
+</beans>
